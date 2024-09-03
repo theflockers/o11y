@@ -57,3 +57,26 @@ tests:
               alert_team_handle: <!subteam^S03SVBS426R>
               runbook_url: https://gitlab.cee.redhat.com/konflux/docs/sop/-/blob/main/release-service/release-validation-latency.md?ref_type=heads
               team: release
+
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_container_status_ready{job="release", namespace="release-service", source_cluster="cluster01"}'
+        values: '1+9x1'
+      - series: 'kube_pod_container_status_ready{job="release", namespace="release-service", source_cluster="cluster02"}'
+        values: '1+9x0'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: ReleaseServiceControllerManagerAvailability
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              slo: "true"
+              job: "release"
+            exp_annotations:
+              summary: >-
+                The Release Service Controller Manager must be available 99% of the time
+              description: >-
+                The Release Service Controller Manager is failing to be available for 99% of the time
+              alert_team_handle: <!subteam^S03SVBS426R>
+              runbook_url: https://gitlab.cee.redhat.com/konflux/docs/sop/-/blob/main/release-service/release-controller-availability.md?ref_type=heads
+              team: release
